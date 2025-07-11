@@ -48,18 +48,64 @@ public class DiceRoller : MonoBehaviour
 
     IEnumerator RollAndCheck(string who)
     {
-        Roll();
+        List<int> results = new List<int>();
 
-        yield return new WaitForSeconds(2.0f); // 転がり待ち（調整可能）
+        for (int i = 0; i < 3; i++)
+        {
+            Roll();
+            yield return new WaitForSeconds(2.0f); // 停止待ち
+            int result = GetDiceValueByY();
+            results.Add(result);
 
-        int result = GetDiceValueByY();
-        Debug.Log(who + " の出目：" + result);
+            // 出目1個ずつ表示（オプション）
+            Debug.Log($"{who}の{i+1}投目：{result}");
+        }
+
+        // 3つの出目をまとめて表示
+        string resultStr = string.Join(",", results);
+        // if (resultText != null)
+        //     resultText.text = $"{who}の出目：{resultStr}";
+
+        string yaku = GetYakuName(results);
 
         if (resultText != null)
-            resultText.text = $"{who}の出目：{result}";
+            resultText.text = $"{who}の出目：{resultStr}\n役：{yaku}";
 
         yield break;
     }
+
+    string GetYakuName(List<int> results)
+    {
+        if (results == null || results.Count != 3)
+            return "不正な出目";
+
+        results.Sort(); // 昇順に並べると判定が楽になる
+
+        int a = results[0];
+        int b = results[1];
+        int c = results[2];
+
+        // ピンゾロ
+        if (a == 1 && b == 1 && c == 1) return "ピンゾロ（最強）";
+
+        // ゾロ目
+        if (a == b && b == c) return $"ゾロ目（{a}）";
+
+        // シゴロ
+        if (a == 4 && b == 5 && c == 6) return "シゴロ（強）";
+
+        // ヒフミ
+        if (a == 1 && b == 2 && c == 3) return "ヒフミ（弱）";
+
+        // 目あり（2つが同じ数字）
+        if (a == b && c != a) return $"目あり：{c}";
+        if (b == c && a != b) return $"目あり：{a}";
+        if (a == c && b != a) return $"目あり：{b}";
+
+        // その他は目無し
+        return "目無し";
+    }
+
 
     public void Roll()
     {
