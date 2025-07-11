@@ -186,7 +186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &486688615
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,8 +231,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8153310012252162071}
-        m_TargetAssemblyTypeName: DiceRoller, Assembly-CSharp
+      - m_Target: {fileID: 1107902126}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: OnClickRetry
         m_Mode: 1
         m_Arguments:
@@ -606,7 +606,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '?'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7abe38c36016284a8e2aa9924ead22a, type: 2}
   m_sharedMaterial: {fileID: -8765886411217018772, guid: c7abe38c36016284a8e2aa9924ead22a, type: 2}
@@ -641,7 +641,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -697,10 +697,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1505117513}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 300}
-  m_SizeDelta: {x: 1000, y: 500}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -400}
+  m_SizeDelta: {x: 1500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &963194225
 GameObject:
@@ -965,9 +965,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1505117513}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 200}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -100}
   m_SizeDelta: {x: 1000, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1068327237
@@ -998,7 +998,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7abe38c36016284a8e2aa9924ead22a, type: 2}
   m_sharedMaterial: {fileID: -8765886411217018772, guid: c7abe38c36016284a8e2aa9924ead22a, type: 2}
@@ -1277,6 +1277,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 458132064}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &1107902125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1107902127}
+  - component: {fileID: 1107902126}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1107902126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1107902125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df828d3b5e8a61849bea3fc1e4192be6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dice: {fileID: 8153310012252162071}
+  resultText: {fileID: 804929860}
+  turnText: {fileID: 1068327238}
+  rollButton: {fileID: 1713562602}
+  retryButton: {fileID: 486688615}
+--- !u!4 &1107902127
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1107902125}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1146716406 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7297624980487784776, guid: 2fedd33831fd51948b9cd2e7e347c4c1, type: 3}
@@ -1742,8 +1791,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8153310012252162071}
-        m_TargetAssemblyTypeName: DiceRoller, Assembly-CSharp
+      - m_Target: {fileID: 1107902126}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: RollDice
         m_Mode: 1
         m_Arguments:
@@ -1998,16 +2047,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5df77009e2137dd42ba362fd7ee2fc44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resultText: {fileID: 1068327238}
-  turnText: {fileID: 1068327238}
-  rollButton: {fileID: 1713562602}
   topFace: {fileID: 165368341}
   bottomFace: {fileID: 1349505869}
   frontFace: {fileID: 1488563847}
   backFace: {fileID: 201702683}
   leftFace: {fileID: 983330340}
   rightFace: {fileID: 1146716406}
-  retryButton: {fileID: 486688615}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2018,3 +2063,4 @@ SceneRoots:
   - {fileID: 682597256}
   - {fileID: 3477614475704447330}
   - {fileID: 458132064}
+  - {fileID: 1107902127}
