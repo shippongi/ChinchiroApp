@@ -2,44 +2,63 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class DiceRoller : MonoBehaviour
 {
-    public Transform topFace;
-    public Transform bottomFace;
-    public Transform frontFace;
-    public Transform backFace;
-    public Transform leftFace;
-    public Transform rightFace;
-
     public TMP_Text resultText;
+    public TMP_Text turnText;
+    public GameObject rollButton;
+
+    public Transform topFace, bottomFace, frontFace, backFace, leftFace, rightFace;
 
     Rigidbody rb;
+
+    private enum Turn { Player, CPU }
+    private Turn currentTurn = Turn.Player;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        UpdateTurnDisplay();
     }
 
     public void RollDice()
     {
-        StartCoroutine(RollAndCheck());
+        if (currentTurn != Turn.Player) return;
+
+        StartCoroutine(RollAndSwitchTurn());
     }
 
-    IEnumerator RollAndCheck()
+    IEnumerator RollAndSwitchTurn()
     {
-        Roll(); // 実際に転がす
+        yield return StartCoroutine(RollAndCheck("あなた"));
+        yield return new WaitForSeconds(1f);
+
+        currentTurn = Turn.CPU;
+        UpdateTurnDisplay();
+
+        yield return new WaitForSeconds(1f);
+        yield return StartCoroutine(RollAndCheck("CPU"));
+        yield return new WaitForSeconds(1f);
+
+        currentTurn = Turn.Player;
+        UpdateTurnDisplay();
+    }
+
+    IEnumerator RollAndCheck(string who)
+    {
+        Roll();
 
         yield return new WaitForSeconds(2.0f); // 転がり待ち（調整可能）
 
         int result = GetDiceValueByY();
-        Debug.Log("出目：" + result);
+        Debug.Log(who + " の出目：" + result);
 
         if (resultText != null)
-        {
-            resultText.text = "出目：" + result.ToString();
-        }
+            resultText.text = $"{who}の出目：{result}";
 
+        yield break;
     }
 
     public void Roll()
@@ -52,62 +71,45 @@ public class DiceRoller : MonoBehaviour
         Vector3 randomDir = Random.onUnitSphere;
         float force = Random.Range(5f, 10f);
         rb.AddForce(Vector3.up * 5f + randomDir * force, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * force, ForceMode.Impulse); 
+        rb.AddTorque(Random.insideUnitSphere * force, ForceMode.Impulse);
     }
-
-    // public int GetDiceValue()
-    // {
-    //     float maxDot = -1f;
-    //     int result = -1;
-
-    //     var faceNormals = new (Transform face, int value)[]
-    //     {
-    //         (topFace, 2),
-    //         (bottomFace, 5),
-    //         (frontFace, 6),
-    //         (backFace, 1),
-    //         (leftFace, 3),
-    //         (rightFace, 4)
-    //     };
-
-    //     foreach (var (face, value) in faceNormals)
-    //     {
-    //         float dot = Vector3.Dot(face.up, Vector3.up);
-    //         if (dot > maxDot)
-    //         {
-    //             maxDot = dot;
-    //             result = value;
-    //         }
-    //     }
-
-    //     return result;
-    // }
 
     int GetDiceValueByY()
     {
-        Dictionary<Transform, int> faceValues = new Dictionary<Transform, int>()
+        var faces = new (Transform t, int value)[]
         {
-            { topFace, 2 },
-            { bottomFace, 5 },
-            { frontFace, 6 },
-            { backFace, 1 },
-            { leftFace, 3 },
-            { rightFace, 4 },
+            (topFace, 2),
+            (bottomFace, 5),
+            (frontFace, 6),
+            (backFace, 1),
+            (leftFace, 3),
+            (rightFace, 4)
         };
 
-        Transform highestFace = null;
-        float highestY = float.MinValue;
+        Transform maxT = null;
+        float maxY = float.MinValue;
+        int result = -1;
 
-        foreach (var pair in faceValues)
+        foreach (var (t, value) in faces)
         {
-            float y = pair.Key.position.y;
-            if (y > highestY)
+            if (t.position.y > maxY)
             {
-                highestY = y;
-                highestFace = pair.Key;
+                maxY = t.position.y;
+                result = value;
+                maxT = t;
             }
         }
 
-        return faceValues[highestFace];
+        return result;
     }
+
+    void UpdateTurnDisplay()
+    {
+        if (turnText != null)
+            turnText.text = currentTurn == Turn.Player ? "あなたの番です" : "CPUの番です";
+
+        if (rollButton != null)
+            rollButton.SetActive(currentTurn == Turn.Player);
+    }
+
 }
