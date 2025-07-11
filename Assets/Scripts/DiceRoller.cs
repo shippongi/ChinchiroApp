@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.UI;
 
 public class DiceRoller : MonoBehaviour
 {
@@ -17,61 +18,93 @@ public class DiceRoller : MonoBehaviour
     private enum Turn { Player, CPU }
     private Turn currentTurn = Turn.Player;
 
+    [SerializeField] Button retryButton;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         UpdateTurnDisplay();
+        retryButton.gameObject.SetActive(false);
+        // StartCoroutine(RollAndSwitchTurn());
     }
 
     public void RollDice()
     {
         if (currentTurn != Turn.Player) return;
 
+        rollButton.SetActive(false);
+
         StartCoroutine(RollAndSwitchTurn());
     }
 
     IEnumerator RollAndSwitchTurn()
     {
-        yield return StartCoroutine(RollAndCheck("あなた"));
+        DiceResult playerResult = new DiceResult();
+        DiceResult cpuResult = new DiceResult();
+
+        yield return StartCoroutine(RollAndCheck("あなた", res => playerResult = res));
         yield return new WaitForSeconds(1f);
 
         currentTurn = Turn.CPU;
         UpdateTurnDisplay();
 
         yield return new WaitForSeconds(1f);
-        yield return StartCoroutine(RollAndCheck("CPU"));
-        yield return new WaitForSeconds(1f);
+        yield return StartCoroutine(RollAndCheck("CPU", res => cpuResult = res));
 
+        yield return new WaitForSeconds(1f);
         currentTurn = Turn.Player;
         UpdateTurnDisplay();
+
+        // 勝敗判定！
+        int playerPower = GetYakuStrength(playerResult.yaku);
+        int cpuPower = GetYakuStrength(cpuResult.yaku);
+
+        string resultMsg = "";
+        if (playerPower > cpuPower)
+            resultMsg = "あなたの勝ち！";
+        else if (playerPower < cpuPower)
+            resultMsg = "CPUの勝ち！";
+        else
+            resultMsg = "引き分け！";
+
+        if (resultText != null)
+            resultText.text += $"\n\n【結果】{resultMsg}";
+
+        retryButton.gameObject.SetActive(true);
     }
 
-    IEnumerator RollAndCheck(string who)
+    IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
     {
         List<int> results = new List<int>();
 
         for (int i = 0; i < 3; i++)
         {
             Roll();
-            yield return new WaitForSeconds(2.0f); // 停止待ち
+            yield return new WaitForSeconds(2.0f);
             int result = GetDiceValueByY();
             results.Add(result);
-
-            // 出目1個ずつ表示（オプション）
-            Debug.Log($"{who}の{i+1}投目：{result}");
         }
-
-        // 3つの出目をまとめて表示
-        string resultStr = string.Join(",", results);
-        // if (resultText != null)
-        //     resultText.text = $"{who}の出目：{resultStr}";
 
         string yaku = GetYakuName(results);
 
         if (resultText != null)
-            resultText.text = $"{who}の出目：{resultStr}\n役：{yaku}";
+            resultText.text = $"{who}の出目：{string.Join(",", results)}\n役：{yaku}";
+
+        onComplete?.Invoke(new DiceResult(results, yaku));
 
         yield break;
+    }
+
+    struct DiceResult
+    {
+        public List<int> eyes;
+        public string yaku;
+
+        public DiceResult(List<int> eyes, string yaku)
+        {
+            this.eyes = eyes;
+            this.yaku = yaku;
+        }
     }
 
     string GetYakuName(List<int> results)
@@ -106,6 +139,22 @@ public class DiceRoller : MonoBehaviour
         return "目無し";
     }
 
+    int GetYakuStrength(string yaku)
+    {
+        if (yaku.Contains("ピンゾロ")) return 100;
+        if (yaku.Contains("ゾロ目")) return 90;
+        if (yaku.Contains("シゴロ")) return 80;
+        if (yaku.Contains("目あり"))
+        {
+            // 目あり：X → Xの数値を取り出して強さに
+            string[] parts = yaku.Split('：');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int value))
+                return 10 + value;
+            return 10; // fallback
+        }
+        if (yaku.Contains("ヒフミ")) return 5;
+        return 0; // 目無しや不正など
+    }
 
     public void Roll()
     {
@@ -156,6 +205,14 @@ public class DiceRoller : MonoBehaviour
 
         if (rollButton != null)
             rollButton.SetActive(currentTurn == Turn.Player);
+    }
+
+    public void OnClickRetry()
+    {
+        retryButton.gameObject.SetActive(false);
+        resultText.text = "";
+        currentTurn = Turn.Player;      // プレイヤーの番に戻す
+        UpdateTurnDisplay();            // DiceRollボタン表示状態更新
     }
 
 }
