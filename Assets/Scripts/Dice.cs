@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Dice : MonoBehaviour
 {
     public Transform topFace, bottomFace, frontFace, backFace, leftFace, rightFace;
+
     private Rigidbody rb;
     private Vector3 initialPosition;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
         rb.mass = 3f;
         rb.drag = 0.5f;
         rb.angularDrag = 0.8f;
@@ -21,7 +22,6 @@ public class Dice : MonoBehaviour
     {
         initialPosition = transform.position;
     }
-
 
     public void Roll()
     {
@@ -40,48 +40,27 @@ public class Dice : MonoBehaviour
         rb.AddTorque(Random.insideUnitSphere * force, ForceMode.Impulse);
     }
 
-    public bool IsStopped(float velocityThreshold = 0.05f)
+    public bool IsStopped(float threshold = 0.05f)
     {
-        return rb.velocity.magnitude < velocityThreshold &&
-               rb.angularVelocity.magnitude < velocityThreshold;
+        return rb.velocity.magnitude < threshold && rb.angularVelocity.magnitude < threshold;
     }
 
-    public int GetValueByY()
+    public int GetValue()
     {
         var faces = new (Transform t, int value)[]
         {
-            (topFace, 2),
-            (bottomFace, 5),
-            (frontFace, 6),
-            (backFace, 1),
-            (leftFace, 3),
-            (rightFace, 4)
+            (topFace, 2), (bottomFace, 5), (frontFace, 6),
+            (backFace, 1), (leftFace, 3), (rightFace, 4)
         };
 
-        float maxY = float.MinValue;
-        int result = -1;
-        foreach (var (t, value) in faces)
-        {
-            if (t.position.y > maxY)
-            {
-                maxY = t.position.y;
-                result = value;
-            }
-        }
-        return result;
+        return faces.OrderByDescending(f => f.t.position.y).First().value;
     }
 
     public void ResetPosition()
     {
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        transform.position = initialPosition;
-        transform.position += new Vector3(0, 0.01f, 0);
+        transform.position = initialPosition + new Vector3(0, 0.01f, 0);
     }
-
-    public int GetValue()
-    {
-        return GetValueByY();
-    }
-
 }
+

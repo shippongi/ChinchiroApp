@@ -3,39 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DIceManager : MonoBehaviour
+public class DiceManager : MonoBehaviour
 {
-    public Dice[] diceArray = new Dice[3];
+    [SerializeField] private Dice[] diceArray;
 
-    public void RollAll()
-    {
-        foreach (var dice in diceArray)
-        {
-            dice.Roll();
-        }
-    }
+    public void RollAll() => diceArray.ToList().ForEach(d => d.Roll());
 
-    public List<int> GetAllResults()
-    {
-        List<int> results = new List<int>();
-        foreach (var dice in diceArray)
-        {
-            results.Add(dice.GetValueByY());
-        }
-        return results;
-    }
+    public List<int> GetAllResults() => diceArray.Select(d => d.GetValue()).ToList();
 
-    public void ResetAll()
-    {
-        foreach (var dice in diceArray)
-        {
-            dice.ResetPosition();
-        }
-    }
+    public List<Dice> GetAllDice() => diceArray.ToList();
 
-    public List<Dice> GetAllDice()
-    {
-        return diceArray.ToList();
-    }
-
+    public void ResetAll() => diceArray.ToList().ForEach(d => d.ResetPosition());
 }
