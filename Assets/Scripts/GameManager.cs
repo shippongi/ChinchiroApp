@@ -15,18 +15,47 @@ public class GameManager : MonoBehaviour
     private enum Turn { Player, CPU }
     private Turn currentTurn = Turn.Player;
 
+    public bool isInputEnabled { get; private set; } = true;
+
+
+    public PlayerController playerController;
+    public UIManager uiManager;
+
+    public bool CanRollByInput()
+    {
+        return isInputEnabled && uiManager.IsRollButtonActive();
+    }
+
     void Start()
     {
         UpdateTurnDisplay();
         retryButton.gameObject.SetActive(false);
     }
 
-    public void RollDice()
+    public void StartPlayerTurn()
     {
         if (currentTurn != Turn.Player) return;
 
-        rollButton.SetActive(false);
+        isInputEnabled = false;
+        uiManager.rollButton.SetActive(false);
         StartCoroutine(RollAndSwitchTurn());
+    }
+
+    public void OnSpaceKey()
+    {
+        if (currentTurn != Turn.Player) return;
+        playerController.TryRoll();
+    }
+
+    public void OnRetryKey()
+    {
+        if (!isInputEnabled) return;
+
+        isInputEnabled = true;
+        uiManager.OnClickRetry();
+        currentTurn = Turn.Player;
+        uiManager.UpdateTurnDisplay(true);
+        // StartCoroutine(RollAndSwitchTurn());
     }
 
     IEnumerator RollAndSwitchTurn()
@@ -62,6 +91,10 @@ public class GameManager : MonoBehaviour
             resultText.text += $"\n【結果】{resultMsg}";
 
         retryButton.gameObject.SetActive(true);
+        uiManager.HideRollButton();
+        uiManager.ShowRetryButton(true);
+
+        isInputEnabled = true;
     }
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
@@ -82,14 +115,6 @@ public class GameManager : MonoBehaviour
             resultText.text = $"{who}の出目：{string.Join(",", results)}\n役：{yaku}";
 
         onComplete?.Invoke(new DiceResult(results, yaku));
-    }
-
-    public void OnClickRetry()
-    {
-        retryButton.gameObject.SetActive(false);
-        resultText.text = "";
-        currentTurn = Turn.Player;
-        UpdateTurnDisplay();
     }
 
     void UpdateTurnDisplay()
