@@ -18,9 +18,24 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        ResetGame();
         uiManager.ShowRetryButton(false);
         uiManager.UpdateTurnDisplay(true);
         UpdateMoneyUI();
+    }
+
+    void ResetGame()
+    {
+        moneyManager.ResetMoney();
+        diceManager.ResetAll();
+        uiManager.OnClickRetry();
+        currentTurn = Turn.Player;
+        isInputEnabled = true;
+
+        uiManager.ShowRetryButton(false);
+        uiManager.ShowRematchButton(false);
+        uiManager.UpdateTurnDisplay(true);
+        uiManager.UpdateMoneyDisplay(moneyManager.PlayerMoney, moneyManager.CpuMoney, moneyManager.CurrentBet);
     }
 
     public bool CanRollByInput() => isInputEnabled && uiManager.IsRollButtonActive();
@@ -43,12 +58,18 @@ public class GameManager : MonoBehaviour
         isInputEnabled = true;
     }
 
+    public void OnRematchKey()
+    {
+        ResetGame();
+    }
+
     public void StartPlayerTurn()
     {
         if (currentTurn != Turn.Player) return;
 
         isInputEnabled = false;
         uiManager.HideRollButton();
+        uiManager.SetBetButtonsInteractable(false);
         StartCoroutine(RollAndSwitchTurn());
     }
 
@@ -83,14 +104,21 @@ public class GameManager : MonoBehaviour
 
         moneyManager.ApplyResult(playerPower > cpuPower, isDraw);
         UpdateMoneyUI();
+        EndTurn(resultMsg);
 
         if (moneyManager.IsGameOver())
         {
-            resultMsg += "\n\nゲーム終了！";
+            uiManager.ShowRematchButton(true);
+            uiManager.ShowRetryButton(false);
+            uiManager.ShowResultText("所持金が尽きました！ゲーム終了！");
             isInputEnabled = false;
         }
+        else
+        {
+            uiManager.ShowRetryButton(true);
+            isInputEnabled = true;
+        }
 
-        EndTurn(resultMsg);
     }
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)

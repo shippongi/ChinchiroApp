@@ -66,5 +66,12 @@ public class MoneyManager : MonoBehaviour
     {
         return PlayerMoney <= 0 || CpuMoney <= 0;
     }
+
+    public void ResetMoney()
+    {
+        PlayerMoney = startingMoney;
+        CpuMoney = startingMoney;
+        CurrentBet = initialBet;
+    }
     
 }

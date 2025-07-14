@@ -9,8 +9,16 @@ public class UIManager : MonoBehaviour
     public TMP_Text resultText;
     public TMP_Text turnText;
     public TMP_Text moneyText;
+
     public GameObject rollButton;
     public Button retryButton;
+    public Button rematchButton;
+
+    public Button increaseBetButton;
+    public Button decreaseBetButton;
+    public Button resetBetButton;
+    public Button allInBetButton;
+
     public GameManager gameManager;
     public MoneyManager moneyManager;
 
@@ -21,6 +29,16 @@ public class UIManager : MonoBehaviour
 
         if (rollButton != null)
             rollButton.SetActive(isPlayerTurn);
+        
+        SetBetButtonsInteractable(isPlayerTurn);
+    }
+
+    public void SetBetButtonsInteractable(bool interactable)
+    {
+        if (increaseBetButton != null) increaseBetButton.interactable = interactable;
+        if (decreaseBetButton != null) decreaseBetButton.interactable = interactable;
+        if (resetBetButton != null) resetBetButton.interactable = interactable;
+        if (allInBetButton != null) allInBetButton.interactable = interactable;
     }
 
     public void UpdateMoneyDisplay(int playerMoney, int cpuMoney, int betAmount)
@@ -39,10 +57,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowRetryButton(bool show)
-    {
-        retryButton.gameObject.SetActive(show);
-    }
+    public void ShowRetryButton(bool show) => retryButton?.gameObject.SetActive(show);
+    public void ShowRematchButton(bool show) => rematchButton?.gameObject.SetActive(show);
+    public void HideRollButton() => rollButton?.SetActive(false);
+    public bool IsRollButtonActive() => rollButton != null && rollButton.activeSelf;
 
     public void OnClickRetry()
     {
@@ -54,17 +72,6 @@ public class UIManager : MonoBehaviour
     public void ShowResultText(string text)
     {
         resultText.text += text + "\n";
-    }
-
-    public bool IsRollButtonActive()
-    {
-        return rollButton != null && rollButton.activeSelf;
-    }
-
-    public void HideRollButton()
-    {
-        if (rollButton != null)
-            rollButton.SetActive(false);
     }
 
     public void OnClickIncreaseBet()
