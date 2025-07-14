@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public UIManager uiManager;
     public DiceManager diceManager;
     public PlayerController playerController;
+    public MoneyManager moneyManager;
 
     private enum Turn { Player, CPU }
     private Turn currentTurn = Turn.Player;
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.ShowRetryButton(false);
         uiManager.UpdateTurnDisplay(true);
+        UpdateMoneyUI();
     }
 
     public bool CanRollByInput() => isInputEnabled && uiManager.IsRollButtonActive();
@@ -52,27 +54,43 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RollAndSwitchTurn()
     {
-        var playerResult = new DiceResult();
-        var cpuResult = new DiceResult();
+        DiceResult playerResult = new DiceResult();
+        DiceResult cpuResult = new DiceResult();
 
         yield return StartCoroutine(RollAndCheck("あなた", res => playerResult = res));
         yield return new WaitForSeconds(1f);
 
         currentTurn = Turn.CPU;
         uiManager.UpdateTurnDisplay(false);
-        yield return new WaitForSeconds(1f);
 
-        yield return StartCoroutine(RollAndCheck("CPU", res => cpuResult = res));
         yield return new WaitForSeconds(1f);
+        yield return StartCoroutine(RollAndCheck("CPU", res => cpuResult = res));
+
+        yield return new WaitForSeconds(1f);
+        currentTurn = Turn.Player;
+        uiManager.UpdateTurnDisplay(true);
 
         int playerPower = YakuUtility.GetYakuStrength(playerResult.yaku);
         int cpuPower = YakuUtility.GetYakuStrength(cpuResult.yaku);
-        string result = playerPower > cpuPower ? "あなたの勝ち！" :
-                        playerPower < cpuPower ? "CPUの勝ち！" : "引き分け！";
 
-        uiManager.ShowResultText($"\n【結果】{result}");
-        uiManager.ShowRetryButton(true);
-        isInputEnabled = true;
+        string resultMsg;
+        bool isDraw = playerPower == cpuPower;
+
+        if (isDraw)
+            resultMsg = "引き分け！";
+        else
+            resultMsg = playerPower > cpuPower ? "あなたの勝ち！" : "CPUの勝ち！";
+
+        moneyManager.ApplyResult(playerPower > cpuPower, isDraw);
+        UpdateMoneyUI();
+
+        if (moneyManager.IsGameOver())
+        {
+            resultMsg += "\n\nゲーム終了！";
+            isInputEnabled = false;
+        }
+
+        EndTurn(resultMsg);
     }
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
@@ -100,10 +118,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void UpdateMoneyUI()
+    {
+        uiManager.UpdateMoneyDisplay(
+            moneyManager.PlayerMoney,
+            moneyManager.CpuMoney,
+            moneyManager.CurrentBet);
+    }
+
+    void EndTurn(string resultMsg)
+    {
+        uiManager.ShowResultText($"\n【結果】{resultMsg}");
+        uiManager.HideRollButton();
+        uiManager.ShowRetryButton(true);
+        isInputEnabled = true;
+    }
+
     struct DiceResult
     {
         public List<int> eyes;
         public string yaku;
         public DiceResult(List<int> eyes, string yaku) { this.eyes = eyes; this.yaku = yaku; }
     }
+
+    public void ChangeBet(bool increase)
+    {
+        if (increase)
+            moneyManager.IncreaseBet();
+        else
+            moneyManager.DecreaseBet();
+
+        UpdateMoneyUI();
+    }
+
 }
