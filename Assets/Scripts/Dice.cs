@@ -11,6 +11,10 @@ public class Dice : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        rb.mass = 3f;
+        rb.drag = 0.5f;
+        rb.angularDrag = 0.8f;
     }
 
     void Start()
@@ -34,6 +38,12 @@ public class Dice : MonoBehaviour
         float force = Random.Range(5f, 10f);
         rb.AddForce(Vector3.up * 5f + randomDir * force, ForceMode.Impulse);
         rb.AddTorque(Random.insideUnitSphere * force, ForceMode.Impulse);
+    }
+
+    public bool IsStopped(float velocityThreshold = 0.05f)
+    {
+        return rb.velocity.magnitude < velocityThreshold &&
+               rb.angularVelocity.magnitude < velocityThreshold;
     }
 
     public int GetValueByY()
@@ -67,6 +77,11 @@ public class Dice : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         transform.position = initialPosition;
         transform.position += new Vector3(0, 0.01f, 0);
+    }
+
+    public int GetValue()
+    {
+        return GetValueByY();
     }
 
 }

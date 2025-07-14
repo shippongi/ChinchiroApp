@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -98,17 +99,39 @@ public class GameManager : MonoBehaviour
         isInputEnabled = true;
     }
 
+    IEnumerator WaitForDiceToStop(List<Dice> diceList, float threshold = 0.05f, float duration = 1.0f)
+    {
+        float timer = 0f;
+
+        while (true)
+        {
+            bool allStopped = diceList.All(dice => dice.IsStopped(threshold));
+
+            if (allStopped)
+            {
+                timer += Time.deltaTime;
+                if (timer >= duration)
+                    yield break;
+            }
+            else
+            {
+                timer = 0f;
+            }
+
+            yield return null;
+        }
+    }
+
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
     {
         diceManager.RollAll();
 
-        yield return new WaitForSeconds(2.5f);
+        yield return StartCoroutine(WaitForDiceToStop(diceManager.GetAllDice()));
 
-        List<int> results = diceManager.GetAllResults();
+        List<int> results = diceManager.GetAllDice().Select(d => d.GetValue()).ToList();
         string yaku = GetYakuName(results);
 
-        uiManager.ShowResultText($"{who}の出目：{string.Join(",", results)}\n役：{yaku}");
-        onComplete?.Invoke(new DiceResult(results, yaku));
+        uiManager.ShowResult(who, results, yaku);
 
         onComplete?.Invoke(new DiceResult(results, yaku));
     }

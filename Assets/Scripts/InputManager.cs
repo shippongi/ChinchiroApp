@@ -8,13 +8,11 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        // if (!gameManager.isInputEnabled) return;
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (gameManager.CanRollByInput())
             {
-                gameManager.OnSpaceKey();  // ← ここで処理
+                gameManager.OnSpaceKey();
             }
         }
 

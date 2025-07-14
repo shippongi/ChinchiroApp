@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DIceManager : MonoBehaviour
@@ -30,6 +31,11 @@ public class DIceManager : MonoBehaviour
         {
             dice.ResetPosition();
         }
+    }
+
+    public List<Dice> GetAllDice()
+    {
+        return diceArray.ToList();
     }
 
 }

@@ -20,6 +20,14 @@ public class UIManager : MonoBehaviour
             rollButton.SetActive(isPlayerTurn);
     }
 
+    public void ShowResult(string who, List<int> results, string yaku)
+    {
+        if (resultText != null)
+        {
+            resultText.text += $"{who}の出目：{string.Join(",", results)}\n役：{yaku}\n";
+        }
+    }
+
     public void ShowRetryButton(bool show)
     {
         retryButton.gameObject.SetActive(show);
@@ -47,6 +55,5 @@ public class UIManager : MonoBehaviour
         if (rollButton != null)
             rollButton.SetActive(false);
     }
-
 
 }
