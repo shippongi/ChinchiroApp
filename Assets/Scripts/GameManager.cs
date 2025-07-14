@@ -6,7 +6,6 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public DiceRoller dice;
     public TMP_Text resultText;
     public TMP_Text turnText;
     public GameObject rollButton;
@@ -20,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     public PlayerController playerController;
     public UIManager uiManager;
+    public DIceManager diceManager;
 
     public bool CanRollByInput()
     {
@@ -51,11 +51,12 @@ public class GameManager : MonoBehaviour
     {
         if (!isInputEnabled) return;
 
-        isInputEnabled = true;
+        isInputEnabled = false;
         uiManager.OnClickRetry();
+        diceManager.ResetAll();
         currentTurn = Turn.Player;
         uiManager.UpdateTurnDisplay(true);
-        // StartCoroutine(RollAndSwitchTurn());
+        isInputEnabled = true;
     }
 
     IEnumerator RollAndSwitchTurn()
@@ -99,20 +100,15 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
     {
-        List<int> results = new List<int>();
+        diceManager.RollAll();
 
-        for (int i = 0; i < 3; i++)
-        {
-            dice.Roll();
-            yield return new WaitForSeconds(2.0f);
-            int result = dice.GetTopFaceValue();
-            results.Add(result);
-        }
+        yield return new WaitForSeconds(2.5f);
 
+        List<int> results = diceManager.GetAllResults();
         string yaku = GetYakuName(results);
 
-        if (resultText != null)
-            resultText.text = $"{who}の出目：{string.Join(",", results)}\n役：{yaku}";
+        uiManager.ShowResultText($"{who}の出目：{string.Join(",", results)}\n役：{yaku}");
+        onComplete?.Invoke(new DiceResult(results, yaku));
 
         onComplete?.Invoke(new DiceResult(results, yaku));
     }
