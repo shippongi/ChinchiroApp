@@ -18,9 +18,10 @@ public class Dice : MonoBehaviour
         rb.angularDrag = 0.8f;
     }
 
-    void Start()
+    public void SetInitialPosition(Vector3 pos)
     {
-        initialPosition = transform.position;
+        initialPosition = pos;
+        transform.position = initialPosition;
     }
 
     public void Roll()
