@@ -10,9 +10,43 @@ public class MoneyManager : MonoBehaviour
     [SerializeField] private int maxBet = 100000;
     [SerializeField] private int betStep = 5000;
 
+    [SerializeField] private bool enableDoubleRule = true;
+
+    [System.Serializable]
+    public class YakuMultiplier
+    {
+        public string yakuKeyword;
+        public int multiplier;
+    }
+
+    [SerializeField]
+    private List<YakuMultiplier> yakuMultipliers = new List<YakuMultiplier>
+    {
+        new YakuMultiplier { yakuKeyword = "ピンゾロ", multiplier = 5 },
+        new YakuMultiplier { yakuKeyword = "ゾロ目", multiplier = 3 },
+        new YakuMultiplier { yakuKeyword = "シゴロ", multiplier = 2 },
+        new YakuMultiplier { yakuKeyword = "目あり", multiplier = 1 },
+        new YakuMultiplier { yakuKeyword = "ヒフミ", multiplier = 2 },
+        new YakuMultiplier { yakuKeyword = "目無し", multiplier = 1 }
+    };
+
+   private int GetMultiplier(string yaku)
+    {
+        foreach (var entry in yakuMultipliers)
+        {
+            if (yaku.Contains(entry.yakuKeyword))
+            {
+                return entry.multiplier;
+            }
+        }
+        return 1;
+    } 
+
     public int PlayerMoney { get; private set; }
     public int CpuMoney { get; private set; }
     public int CurrentBet { get; private set; }
+
+    public bool IsDoubleRuleEnabled => enableDoubleRule;
 
     void Awake()
     {
@@ -44,11 +78,25 @@ public class MoneyManager : MonoBehaviour
     }
 
 
-    public void ApplyResult(bool playerWon, bool isDraw)
+    public void ApplyResult(bool playerWon, bool isDraw, string winnerYaku, string loserYaku)
     {
         if (isDraw) return;
 
-        int change = CurrentBet;
+        int winnerMultiplier = GetMultiplier(winnerYaku);
+        int loserMultiplier = GetMultiplier(loserYaku);
+
+        int finalMultiplier;
+
+        if (winnerYaku.Contains("ヒフミ") || loserYaku.Contains("ヒフミ"))
+        {
+            finalMultiplier = Mathf.Max(winnerMultiplier, loserMultiplier);
+        }
+        else
+        {
+            finalMultiplier = winnerMultiplier;
+        }
+
+        int change = CurrentBet * finalMultiplier;
 
         if (playerWon)
         {
@@ -60,6 +108,19 @@ public class MoneyManager : MonoBehaviour
             PlayerMoney -= change;
             CpuMoney += change;
         }
+    }
+
+    private int GetMultiplierFromYaku(string yaku)
+    {
+        if (!enableDoubleRule) return 1;
+
+        foreach (var entry in yakuMultipliers)
+        {
+            if (yaku.Contains(entry.yakuKeyword))
+                return entry.multiplier;
+        }
+
+        return 1;
     }
 
     public bool IsGameOver()

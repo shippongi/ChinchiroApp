@@ -3771,6 +3771,20 @@ MonoBehaviour:
   minBet: 10000
   maxBet: 1000000
   betStep: 5000
+  enableDoubleRule: 1
+  yakuMultipliers:
+  - yakuKeyword: "\u30D4\u30F3\u30BE\u30ED"
+    multiplier: 5
+  - yakuKeyword: "\u30BE\u30ED\u76EE"
+    multiplier: 3
+  - yakuKeyword: "\u30B7\u30B4\u30ED"
+    multiplier: 2
+  - yakuKeyword: "\u76EE\u3042\u308A"
+    multiplier: 1
+  - yakuKeyword: "\u30D2\u30D5\u30DF"
+    multiplier: 2
+  - yakuKeyword: "\u76EE\u7121\u3057"
+    multiplier: 1
 --- !u!1001 &1743271747
 PrefabInstance:
   m_ObjectHideFlags: 0

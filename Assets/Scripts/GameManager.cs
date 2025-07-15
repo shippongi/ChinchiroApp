@@ -97,12 +97,29 @@ public class GameManager : MonoBehaviour
         string resultMsg;
         bool isDraw = playerPower == cpuPower;
 
+        // 勝者の役名を決定
+        string winnerYaku = "";
         if (isDraw)
+        {
             resultMsg = "引き分け！";
+        }
+        else if (playerPower > cpuPower)
+        {
+            resultMsg = "あなたの勝ち！";
+            winnerYaku = playerResult.yaku;
+        }
         else
-            resultMsg = playerPower > cpuPower ? "あなたの勝ち！" : "CPUの勝ち！";
+        {
+            resultMsg = "CPUの勝ち！";
+            winnerYaku = cpuResult.yaku;
+        }
 
-        moneyManager.ApplyResult(playerPower > cpuPower, isDraw);
+        moneyManager.ApplyResult(
+            playerPower > cpuPower,
+            isDraw,
+            playerPower > cpuPower ? playerResult.yaku : cpuResult.yaku,
+            playerPower > cpuPower ? cpuResult.yaku : playerResult.yaku
+        );
         UpdateMoneyUI();
         EndTurn(resultMsg);
 
@@ -118,8 +135,56 @@ public class GameManager : MonoBehaviour
             uiManager.ShowRetryButton(true);
             isInputEnabled = true;
         }
-
     }
+
+
+    // IEnumerator RollAndSwitchTurn()
+    // {
+    //     DiceResult playerResult = new DiceResult();
+    //     DiceResult cpuResult = new DiceResult();
+
+    //     yield return StartCoroutine(RollAndCheck("あなた", res => playerResult = res));
+    //     yield return new WaitForSeconds(1f);
+
+    //     currentTurn = Turn.CPU;
+    //     uiManager.UpdateTurnDisplay(false);
+
+    //     yield return new WaitForSeconds(1f);
+    //     yield return StartCoroutine(RollAndCheck("CPU", res => cpuResult = res));
+
+    //     yield return new WaitForSeconds(1f);
+    //     currentTurn = Turn.Player;
+    //     uiManager.UpdateTurnDisplay(true);
+
+    //     int playerPower = YakuUtility.GetYakuStrength(playerResult.yaku);
+    //     int cpuPower = YakuUtility.GetYakuStrength(cpuResult.yaku);
+
+    //     string resultMsg;
+    //     bool isDraw = playerPower == cpuPower;
+
+    //     if (isDraw)
+    //         resultMsg = "引き分け！";
+    //     else
+    //         resultMsg = playerPower > cpuPower ? "あなたの勝ち！" : "CPUの勝ち！";
+
+    //     moneyManager.ApplyResult(playerPower > cpuPower, isDraw, playerResult.yaku);
+    //     UpdateMoneyUI();
+    //     EndTurn(resultMsg);
+
+    //     if (moneyManager.IsGameOver())
+    //     {
+    //         uiManager.ShowRematchButton(true);
+    //         uiManager.ShowRetryButton(false);
+    //         uiManager.ShowResultText("所持金が尽きました！ゲーム終了！");
+    //         isInputEnabled = false;
+    //     }
+    //     else
+    //     {
+    //         uiManager.ShowRetryButton(true);
+    //         isInputEnabled = true;
+    //     }
+
+    // }
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
     {
