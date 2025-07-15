@@ -32,10 +32,11 @@ public static class YakuUtility
         if (yaku.Contains("目あり"))
         {
             if (int.TryParse(yaku.Split('：')[1], out int v))
-                return 10 + v;
-            return 10;
+                return 50 + v;
+            return 50;
         }
-        if (yaku.Contains("ヒフミ")) return 5;
+        if (yaku.Contains("目無し")) return 30;
+        if (yaku.Contains("ヒフミ")) return 10;
         return 0;
     }
 }

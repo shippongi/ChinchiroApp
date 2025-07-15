@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,10 +15,10 @@ public class UIManager : MonoBehaviour
     public Button retryButton;
     public Button rematchButton;
 
-    public Button increaseBetButton;
-    public Button decreaseBetButton;
-    public Button resetBetButton;
-    public Button allInBetButton;
+    [SerializeField] public Button increaseBetButton;
+    [SerializeField] public Button decreaseBetButton;
+    [SerializeField] public Button resetBetButton;
+    [SerializeField] public Button allInBetButton;
 
     public GameManager gameManager;
     public MoneyManager moneyManager;
@@ -29,7 +30,7 @@ public class UIManager : MonoBehaviour
 
         if (rollButton != null)
             rollButton.SetActive(isPlayerTurn);
-        
+
         SetBetButtonsInteractable(isPlayerTurn);
     }
 
@@ -49,18 +50,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowResult(string who, List<int> results, string yaku)
+    public void ShowYakuResult(string who, List<int> results, string yaku)
     {
-        if (resultText != null)
-        {
-            resultText.text += $"{who}の出目：{string.Join(",", results)}\n役：{yaku}\n";
-        }
+        resultText.text = $"{who}の出目：{string.Join(",", results)}\n役：{yaku}\n";
+    }
+
+    public void ShowMatchResult(string resultMsg)
+    {
+        resultText.text += $"【結果】{resultMsg}\n";
     }
 
     public void ShowRetryButton(bool show) => retryButton?.gameObject.SetActive(show);
     public void ShowRematchButton(bool show) => rematchButton?.gameObject.SetActive(show);
     public void HideRollButton() => rollButton?.SetActive(false);
     public bool IsRollButtonActive() => rollButton != null && rollButton.activeSelf;
+
+    public void ShowRollButton(bool show)
+    {
+        if (rollButton != null)
+            rollButton.SetActive(show);
+    }
 
     public void OnClickRetry()
     {
@@ -96,5 +105,28 @@ public class UIManager : MonoBehaviour
         UpdateMoneyDisplay(moneyManager.PlayerMoney, moneyManager.CpuMoney, moneyManager.CurrentBet);
     }
 
+    public void SetBetChangeInteractable(bool interactable)
+    {
+        increaseBetButton.interactable = interactable;
+        decreaseBetButton.interactable = interactable;
+        resetBetButton.interactable = interactable;
+        allInBetButton.interactable = interactable;
+    }
+
+    public void RemoveResultSection(string who)
+    {
+        if (resultText == null) return;
+
+        var lines = resultText.text.Split('\n');
+        resultText.text = string.Join("\n", lines
+            .Where(line => !line.StartsWith($"{who}の出目：") && !line.StartsWith("役："))
+            .ToArray());
+    }
+
+    public void ClearResultText()
+    {
+        if (resultText != null)
+            resultText.text = "";
+    }
 
 }
