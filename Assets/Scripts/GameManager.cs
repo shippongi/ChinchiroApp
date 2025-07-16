@@ -20,23 +20,26 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         ResetGame();
-        uiManager.ShowRetryButton(false);
-        uiManager.UpdateTurnDisplay(true);
-        UpdateMoneyUI();
     }
 
     void ResetGame()
     {
         moneyManager.ResetMoney();
         diceManager.ResetAll();
-        uiManager.OnClickRetry();
+
+        uiManager.ClearAllTexts();
+        uiManager.ShowRetryButton(false);
+        uiManager.ShowRematchButton(false);
+
         currentTurn = Turn.Player;
         isInputEnabled = true;
 
-        uiManager.ShowRetryButton(false);
-        uiManager.ShowRematchButton(false);
         uiManager.UpdateTurnDisplay(true);
-        uiManager.UpdateMoneyDisplay(moneyManager.PlayerMoney, moneyManager.CpuMoney, moneyManager.CurrentBet);
+        uiManager.UpdateMoneyDisplay(
+            moneyManager.PlayerMoney,
+            moneyManager.CpuMoney,
+            moneyManager.CurrentBet
+        );
     }
 
     public bool CanRollByInput() => isInputEnabled && uiManager.IsRollButtonActive();
@@ -54,11 +57,15 @@ public class GameManager : MonoBehaviour
         if (!isInputEnabled) return;
 
         isInputEnabled = false;
+
         diceManager.ResetAll();
         uiManager.OnClickRetry();
+        uiManager.ClearAllTexts();
+
         currentTurn = Turn.Player;
-        uiManager.UpdateTurnDisplay(true);
         isInputEnabled = true;
+
+        uiManager.UpdateTurnDisplay(true);
     }
 
     public void OnRematchKey()
@@ -81,27 +88,26 @@ public class GameManager : MonoBehaviour
         if (isTurnProcessing) yield break;
         isTurnProcessing = true;
 
+        // プレイヤーのターン
+        uiManager.UpdateTurnDisplay(true);
         DiceResult playerResult = new DiceResult();
-        DiceResult cpuResult = new DiceResult();
-
         yield return StartCoroutine(RollAndCheck("あなた", res => playerResult = res));
+
         yield return new WaitForSeconds(1f);
 
+        // CPUのターン
         currentTurn = Turn.CPU;
         uiManager.UpdateTurnDisplay(false);
-
-        yield return new WaitForSeconds(1f);
+        DiceResult cpuResult = new DiceResult();
         yield return StartCoroutine(RollAndCheck("CPU", res => cpuResult = res));
 
         yield return new WaitForSeconds(1f);
-        currentTurn = Turn.Player;
-        uiManager.UpdateTurnDisplay(true);
 
-        int playerPower = YakuUtility.GetYakuStrength(playerResult.yaku);
-        int cpuPower = YakuUtility.GetYakuStrength(cpuResult.yaku);
-
+        // 勝敗判定とUI表示
         HandleTurnResult(playerResult, cpuResult);
 
+        currentTurn = Turn.Player;
+        uiManager.UpdateTurnDisplay(null); // "結果"表示へ
         isTurnProcessing = false;
     }
 
@@ -126,8 +132,10 @@ public class GameManager : MonoBehaviour
             resultMsg = "CPUの勝ち！";
         }
 
+        // UI表示
         uiManager.ShowMatchResult(resultMsg);
 
+        // 所持金の更新
         moneyManager.ApplyResult(
             playerPower > cpuPower,
             isDraw,
@@ -135,20 +143,9 @@ public class GameManager : MonoBehaviour
             playerPower > cpuPower ? cpuResult.yaku : playerResult.yaku
         );
         UpdateMoneyUI();
-        EndTurn(resultMsg);
 
-        if (moneyManager.IsGameOver())
-        {
-            uiManager.ShowRematchButton(true);
-            uiManager.ShowRetryButton(false);
-            uiManager.ShowResultText("所持金が尽きました！ゲーム終了！");
-            isInputEnabled = false;
-        }
-        else
-        {
-            uiManager.ShowRetryButton(true);
-            isInputEnabled = true;
-        }
+        // 終了処理
+        EndTurn(resultMsg);
     }
 
     IEnumerator RollAndCheck(string who, System.Action<DiceResult> onComplete)
@@ -159,7 +156,8 @@ public class GameManager : MonoBehaviour
         DiceResult currentResult = new DiceResult();
         DiceResult finalResult = new DiceResult();
 
-        uiManager.RemoveResultSection(who);
+        // 初期表示のクリア（共通欄）
+        uiManager.ResetResultText();
 
         while (true)
         {
@@ -168,10 +166,10 @@ public class GameManager : MonoBehaviour
 
             var eyes = diceManager.GetAllResults();
             string yaku = YakuUtility.GetYakuName(eyes);
-
             currentResult = new DiceResult(eyes, yaku);
 
-            uiManager.ShowYakuResult(who, eyes, yaku);
+            // 共通：現在の出目表示（中間表示）
+            uiManager.ShowMidRollResult(who, eyes, yaku);
 
             if (yaku == "目無し" && rerollCount < maxReroll)
             {
@@ -182,9 +180,7 @@ public class GameManager : MonoBehaviour
                     uiManager.ShowRollButton(true);
                     uiManager.SetBetChangeInteractable(false);
                     isInputEnabled = true;
-
                     yield return new WaitUntil(() => !uiManager.IsRollButtonActive());
-
                     isInputEnabled = false;
                 }
                 else
@@ -201,6 +197,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // 最終確定役の保存・表示
+        uiManager.ShowFinalYakuResult(who, finalResult.eyes, finalResult.yaku);
         onComplete?.Invoke(finalResult);
     }
 
@@ -222,24 +220,37 @@ public class GameManager : MonoBehaviour
         uiManager.UpdateMoneyDisplay(
             moneyManager.PlayerMoney,
             moneyManager.CpuMoney,
-            moneyManager.CurrentBet);
+            moneyManager.CurrentBet
+        );
     }
 
     void EndTurn(string resultMsg)
     {
         uiManager.ClearResultText();
-
-        uiManager.ShowResultText($"\n【結果】{resultMsg}");
+        uiManager.ShowMatchResult($"{resultMsg}");
         uiManager.HideRollButton();
         uiManager.ShowRetryButton(true);
+
         isInputEnabled = true;
+
+        if (moneyManager.IsGameOver())
+        {
+            uiManager.ShowRematchButton(true);
+            uiManager.ShowRetryButton(false);
+            uiManager.ShowResultText("所持金が尽きました！ゲーム終了！");
+            isInputEnabled = false;
+        }
     }
 
     struct DiceResult
     {
         public List<int> eyes;
         public string yaku;
-        public DiceResult(List<int> eyes, string yaku) { this.eyes = eyes; this.yaku = yaku; }
+        public DiceResult(List<int> eyes, string yaku)
+        {
+            this.eyes = eyes;
+            this.yaku = yaku;
+        }
     }
 
     public void ChangeBet(bool increase)
@@ -251,5 +262,4 @@ public class GameManager : MonoBehaviour
 
         UpdateMoneyUI();
     }
-
 }
