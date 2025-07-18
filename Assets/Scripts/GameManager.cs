@@ -252,7 +252,8 @@ public class GameManager : MonoBehaviour
 
     public void PurchaseCard(CardData card)
     {
-        if (MoneyManager.Instance.CurrentPlayerMoney >= card.price)
+        Debug.Log(MoneyManager.Instance.PlayerMoney);
+        if (MoneyManager.Instance.PlayerMoney >= card.price)
         {
             MoneyManager.Instance.SubtractMoneyFromPlayer(card.price);
 

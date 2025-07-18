@@ -51,7 +51,7 @@ public class MoneyManager : MonoBehaviour
 
     public bool IsDoubleRuleEnabled => enableDoubleRule;
 
-    public int CurrentPlayerMoney { get; internal set; }
+    // public int CurrentPlayerMoney { get; internal set; }
 
     void Awake()
     {
