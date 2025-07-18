@@ -12,10 +12,10 @@ public static class YakuUtility
         results.Sort();
         int a = results[0], b = results[1], c = results[2];
 
-        if (a == 1 && b == 1 && c == 1) return "ピンゾロ（最強）";
-        if (a == b && b == c) return $"ゾロ目（{a}）";
-        if (a == 4 && b == 5 && c == 6) return "シゴロ（強）";
-        if (a == 1 && b == 2 && c == 3) return "ヒフミ（弱）";
+        if (a == 1 && b == 1 && c == 1) return "ピンゾロ";
+        if (a == b && b == c) return $"アラシ({a}）";
+        if (a == 4 && b == 5 && c == 6) return "シゴロ";
+        if (a == 1 && b == 2 && c == 3) return "ヒフミ";
 
         if (a == b) return $"目あり：{c}";
         if (b == c) return $"目あり：{a}";
@@ -27,7 +27,7 @@ public static class YakuUtility
     public static int GetYakuStrength(string yaku)
     {
         if (yaku.Contains("ピンゾロ")) return 100;
-        if (yaku.Contains("ゾロ目")) return 90;
+        if (yaku.Contains("アラシ")) return 90;
         if (yaku.Contains("シゴロ")) return 80;
         if (yaku.Contains("目あり"))
         {
@@ -39,5 +39,15 @@ public static class YakuUtility
         if (yaku.Contains("ヒフミ")) return 10;
         return 0;
     }
+
+    public static int GetYakuMultiplier(string yaku)
+    {
+        if (yaku.Contains("ピンゾロ")) return 5;
+        if (yaku.Contains("アラシ")) return 3;
+        if (yaku.Contains("シゴロ")) return 2;
+        if (yaku.Contains("ヒフミ")) return 2;
+        return 1;
+    }
+
 }
 

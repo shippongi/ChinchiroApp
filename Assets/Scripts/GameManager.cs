@@ -119,21 +119,39 @@ public class GameManager : MonoBehaviour
         string resultMsg;
         bool isDraw = playerPower == cpuPower;
 
+        bool playerWins = playerPower > cpuPower;
+        bool cpuWins = cpuPower > playerPower;
+
         if (isDraw)
         {
             resultMsg = "引き分け！";
-        }
-        else if (playerPower > cpuPower)
-        {
-            resultMsg = "あなたの勝ち！";
+            uiManager.ShowMatchResult(resultMsg); // 倍率なし
         }
         else
         {
-            resultMsg = "CPUの勝ち！";
-        }
+            resultMsg = playerWins ? "あなたの勝ち！" : "CPUの勝ち！";
 
-        // UI表示
-        uiManager.ShowMatchResult(resultMsg);
+            // 倍率の取得（勝者の役に対して）
+            string winnerYaku = playerWins ? playerResult.yaku : cpuResult.yaku;
+            string loserYaku  = playerWins ? cpuResult.yaku : playerResult.yaku;
+
+            int winnerMultiplier = YakuUtility.GetYakuMultiplier(winnerYaku);
+            int loserMultiplier  = YakuUtility.GetYakuMultiplier(loserYaku);
+
+            // 💡 「どちらかがヒフミ」なら高い方の倍率を表示
+            int finalMultiplier;
+            if (winnerYaku.Contains("ヒフミ") || loserYaku.Contains("ヒフミ"))
+            {
+                finalMultiplier = Mathf.Max(winnerMultiplier, loserMultiplier);
+            }
+            else
+            {
+                finalMultiplier = winnerMultiplier;
+            }
+
+            Debug.Log(finalMultiplier);
+            uiManager.ShowMatchResultWithMultiplier(resultMsg, finalMultiplier);
+        }
 
         // 所持金の更新
         moneyManager.ApplyResult(
@@ -227,7 +245,6 @@ public class GameManager : MonoBehaviour
     void EndTurn(string resultMsg)
     {
         uiManager.ClearResultText();
-        uiManager.ShowMatchResult($"{resultMsg}");
         uiManager.HideRollButton();
         uiManager.ShowRetryButton(true);
 

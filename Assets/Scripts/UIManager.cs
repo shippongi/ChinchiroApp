@@ -12,14 +12,12 @@ public class UIManager : MonoBehaviour
     public TMP_Text moneyText;
 
     [Header("ログと役表示")]
-    [SerializeField] TMP_Text resultText; // 全ログ表示欄
-    // [SerializeField] TMP_Text playerResultText; // プレイヤー現在の出目・役表示
-    // [SerializeField] TMP_Text cpuResultText;    // CPU現在の出目・役表示
-    [SerializeField] TMP_Text matchResultText;  // 勝敗結果表示
+    [SerializeField] TMP_Text resultText;
+    [SerializeField] TMP_Text matchResultText; 
 
     [Header("確定役表示（保持）")]
-    [SerializeField] TMP_Text playerFinalYakuText;  // プレイヤー最終役
-    [SerializeField] TMP_Text cpuFinalYakuText;     // CPU最終役
+    [SerializeField] TMP_Text playerFinalYakuText;
+    [SerializeField] TMP_Text cpuFinalYakuText;
 
     [Header("ボタンUI")]
     public GameObject rollButton;
@@ -98,6 +96,20 @@ public class UIManager : MonoBehaviour
             matchResultText.text = $"【結果】{msg}";
     }
 
+    public void ShowMatchResultWithMultiplier(string resultText, int multiplier)
+    {
+        if (multiplier > 1)
+        {
+            matchResultText.text = $"{resultText}（×{multiplier}倍）";
+        }
+        else
+        {
+            matchResultText.text = resultText;
+        }
+
+        matchResultText.gameObject.SetActive(true);
+    }
+
     public void ShowResultText(string text)
     {
         if (resultText != null)
@@ -148,15 +160,11 @@ public class UIManager : MonoBehaviour
         resultText.text = "";
         playerFinalYakuText.text = "";
         cpuFinalYakuText.text = "";
-        // playerResultText.text = "";
-        // cpuResultText.text = "";
         matchResultText.text = "";
     }
 
     public void ResetResultText()
     {
-        // playerResultText.text = "";
-        // cpuResultText.text = "";
         resultText.text = "";
         matchResultText.text = "";
     }
