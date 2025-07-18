@@ -4,27 +4,46 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public UIManager uiManager;
     public DiceManager diceManager;
     public PlayerController playerController;
-    public MoneyManager moneyManager;
+    public CardManager cardManager;
 
     private enum Turn { Player, CPU }
     private Turn currentTurn = Turn.Player;
     private bool isInputEnabled = true;
     private bool isTurnProcessing = false;
 
+    public static GameManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(this.gameObject); // シーン間をまたぐ場合
+    }
+
     void Start()
     {
         ResetGame();
+        if (SceneManager.GetActiveScene().name == "ExtraGameScene") // シーン名に合わせて
+        {
+            cardManager.ShowCardSelection();
+        }
+
     }
 
     void ResetGame()
     {
-        moneyManager.ResetMoney();
+        MoneyManager.Instance.ResetMoney();
         diceManager.ResetAll();
 
         uiManager.ClearAllTexts();
@@ -36,9 +55,9 @@ public class GameManager : MonoBehaviour
 
         uiManager.UpdateTurnDisplay(true);
         uiManager.UpdateMoneyDisplay(
-            moneyManager.PlayerMoney,
-            moneyManager.CpuMoney,
-            moneyManager.CurrentBet
+            MoneyManager.Instance.PlayerMoney,
+            MoneyManager.Instance.CpuMoney,
+            MoneyManager.Instance.CurrentBet
         );
     }
 
@@ -135,26 +154,14 @@ public class GameManager : MonoBehaviour
             string winnerYaku = playerWins ? playerResult.yaku : cpuResult.yaku;
             string loserYaku  = playerWins ? cpuResult.yaku : playerResult.yaku;
 
-            int winnerMultiplier = YakuUtility.GetYakuMultiplier(winnerYaku);
-            int loserMultiplier  = YakuUtility.GetYakuMultiplier(loserYaku);
-
-            // 💡 「どちらかがヒフミ」なら高い方の倍率を表示
-            int finalMultiplier;
-            if (winnerYaku.Contains("ヒフミ") || loserYaku.Contains("ヒフミ"))
-            {
-                finalMultiplier = Mathf.Max(winnerMultiplier, loserMultiplier);
-            }
-            else
-            {
-                finalMultiplier = winnerMultiplier;
-            }
+            int finalMultiplier = YakuUtility.GetFinalMultiplier(winnerYaku, loserYaku);
 
             Debug.Log(finalMultiplier);
             uiManager.ShowMatchResultWithMultiplier(resultMsg, finalMultiplier);
         }
 
         // 所持金の更新
-        moneyManager.ApplyResult(
+        MoneyManager.Instance.ApplyResult(
             playerPower > cpuPower,
             isDraw,
             playerPower > cpuPower ? playerResult.yaku : cpuResult.yaku,
@@ -236,10 +243,28 @@ public class GameManager : MonoBehaviour
     void UpdateMoneyUI()
     {
         uiManager.UpdateMoneyDisplay(
-            moneyManager.PlayerMoney,
-            moneyManager.CpuMoney,
-            moneyManager.CurrentBet
+            MoneyManager.Instance.PlayerMoney,
+            MoneyManager.Instance.CpuMoney,
+            MoneyManager.Instance.CurrentBet
         );
+
+    }
+
+    public void PurchaseCard(CardData card)
+    {
+        if (MoneyManager.Instance.CurrentPlayerMoney >= card.price)
+        {
+            MoneyManager.Instance.SubtractMoneyFromPlayer(card.price);
+
+            // 所有カードリストに追加
+            CardInventory.Instance.AddCardToPlayer(card);
+
+            Debug.Log($"{card.cardName} を購入しました。効果: {card.description}");
+        }
+        else
+        {
+            Debug.Log("所持金が足りません");
+        }
     }
 
     void EndTurn(string resultMsg)
@@ -250,7 +275,7 @@ public class GameManager : MonoBehaviour
 
         isInputEnabled = true;
 
-        if (moneyManager.IsGameOver())
+        if (MoneyManager.Instance.IsGameOver())
         {
             uiManager.ShowRematchButton(true);
             uiManager.ShowRetryButton(false);
@@ -273,9 +298,9 @@ public class GameManager : MonoBehaviour
     public void ChangeBet(bool increase)
     {
         if (increase)
-            moneyManager.IncreaseBet();
+            MoneyManager.Instance.IncreaseBet();
         else
-            moneyManager.DecreaseBet();
+            MoneyManager.Instance.DecreaseBet();
 
         UpdateMoneyUI();
     }

@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MoneyManager : MonoBehaviour
 {
+    public static MoneyManager Instance { get; private set; }
+
     [SerializeField] private int startingMoney = 1_000_000;
     [SerializeField] private int initialBet = 10000;
     [SerializeField] private int minBet = 10000;
@@ -48,8 +51,17 @@ public class MoneyManager : MonoBehaviour
 
     public bool IsDoubleRuleEnabled => enableDoubleRule;
 
+    public int CurrentPlayerMoney { get; internal set; }
+
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
+
         PlayerMoney = startingMoney;
         CpuMoney = startingMoney;
         CurrentBet = initialBet;
@@ -85,17 +97,7 @@ public class MoneyManager : MonoBehaviour
         int winnerMultiplier = GetMultiplier(winnerYaku);
         int loserMultiplier = GetMultiplier(loserYaku);
 
-        int finalMultiplier;
-
-        if (winnerYaku.Contains("ヒフミ") || loserYaku.Contains("ヒフミ"))
-        {
-            finalMultiplier = Mathf.Max(winnerMultiplier, loserMultiplier);
-        }
-        else
-        {
-            finalMultiplier = winnerMultiplier;
-        }
-
+        int finalMultiplier = YakuUtility.GetFinalMultiplier(winnerYaku, loserYaku);
         int change = CurrentBet * finalMultiplier;
 
         if (playerWon)
@@ -110,17 +112,16 @@ public class MoneyManager : MonoBehaviour
         }
     }
 
-    private int GetMultiplierFromYaku(string yaku)
+    public void SubtractMoneyFromPlayer(int amount)
     {
-        if (!enableDoubleRule) return 1;
+        PlayerMoney -= amount;
+        if (PlayerMoney < 0) PlayerMoney = 0;
+    }
 
-        foreach (var entry in yakuMultipliers)
-        {
-            if (yaku.Contains(entry.yakuKeyword))
-                return entry.multiplier;
-        }
-
-        return 1;
+    public void SubtractMoneyFromCpu(int amount)
+    {
+        CpuMoney -= amount;
+        if (CpuMoney < 0) CpuMoney = 0;
     }
 
     public bool IsGameOver()
@@ -134,5 +135,5 @@ public class MoneyManager : MonoBehaviour
         CpuMoney = startingMoney;
         CurrentBet = initialBet;
     }
-    
+
 }

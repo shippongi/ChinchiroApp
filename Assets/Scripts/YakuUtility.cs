@@ -49,5 +49,18 @@ public static class YakuUtility
         return 1;
     }
 
+    public static int GetFinalMultiplier(string winnerYaku, string loserYaku)
+    {
+        int winnerMultiplier = GetYakuMultiplier(winnerYaku);
+        int loserMultiplier = GetYakuMultiplier(loserYaku);
+
+        if (winnerYaku.Contains("ヒフミ") || loserYaku.Contains("ヒフミ"))
+        {
+            return Mathf.Max(winnerMultiplier, loserMultiplier);
+        }
+
+        return winnerMultiplier;
+    }
+
 }
 

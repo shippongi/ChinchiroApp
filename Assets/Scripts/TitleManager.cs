@@ -9,5 +9,8 @@ public class TitleManager : MonoBehaviour
     {
         SceneManager.LoadScene("ChinchiroGameScene");
     }
-
+    public void OnStartExtraGameButtonPressed()
+    {
+        SceneManager.LoadScene("ExtraGameScene");
+    }
 }

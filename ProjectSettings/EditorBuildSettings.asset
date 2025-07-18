@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ChinchiroGameScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/ExtraGameScene.unity
+    guid: 595999fe41c0a7b4d972ea70d086468a
   m_configObjects: {}
