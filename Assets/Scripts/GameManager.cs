@@ -250,24 +250,56 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void PurchaseCard(CardData card)
+    public void PurchaseCard(CardData card, bool isPlayer)
     {
-        Debug.Log(MoneyManager.Instance.PlayerMoney);
-        if (MoneyManager.Instance.PlayerMoney >= card.price)
+        if (isPlayer)
         {
-            MoneyManager.Instance.SubtractMoneyFromPlayer(card.price);
-
-            // 所有カードリストに追加
-            CardInventory.Instance.AddCardToPlayer(card);
-            uiManager.UpdateCardDisplays();
-
-            Debug.Log($"{card.cardName} を購入しました。効果: {card.description}");
+            if (MoneyManager.Instance.PlayerMoney >= card.price)
+            {
+                MoneyManager.Instance.SubtractMoneyFromPlayer(card.price);
+                CardInventory.Instance.AddCardToPlayer(card);
+                uiManager.UpdateCardDisplays();
+                Debug.Log($"プレイヤーが {card.cardName} を購入。効果: {card.description}");
+            }
+            else
+            {
+                Debug.Log("プレイヤーの所持金が足りません");
+            }
         }
         else
         {
-            Debug.Log("所持金が足りません");
+            if (MoneyManager.Instance.CpuMoney >= card.price)
+            {
+                MoneyManager.Instance.SubtractMoneyFromCpu(card.price);
+                CardInventory.Instance.AddCardToCpu(card);
+                uiManager.UpdateCardDisplays();
+                Debug.Log($"CPUが {card.cardName} を購入。効果: {card.description}");
+            }
+            else
+            {
+                Debug.Log("CPUの所持金が足りません（※基本的に到達しない想定）");
+            }
         }
     }
+
+    // public void PurchaseCard(CardData card)
+    // {
+    //     Debug.Log(MoneyManager.Instance.PlayerMoney);
+    //     if (MoneyManager.Instance.PlayerMoney >= card.price)
+    //     {
+    //         MoneyManager.Instance.SubtractMoneyFromPlayer(card.price);
+
+    //         // 所有カードリストに追加
+    //         CardInventory.Instance.AddCardToPlayer(card);
+    //         uiManager.UpdateCardDisplays();
+
+    //         Debug.Log($"{card.cardName} を購入しました。効果: {card.description}");
+    //     }
+    //     else
+    //     {
+    //         Debug.Log("所持金が足りません");
+    //     }
+    // }
 
     void EndTurn(string resultMsg)
     {

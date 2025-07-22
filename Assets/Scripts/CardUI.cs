@@ -13,6 +13,11 @@ public class CardUI : MonoBehaviour
 
     private CardData cardData;
 
+    public CardData GetCardData()
+    {
+        return cardData;
+    }
+
     public void Setup(CardData data)
     {
         cardData = data;
@@ -34,16 +39,13 @@ public class CardUI : MonoBehaviour
             purchaseButton.onClick.AddListener(() => PurchaseCard());
         }
 
-        // cardNameText.text = data.cardName;
-        // priceText.text = $"{data.price:N0}円";
-        // descriptionText.text = data.description;
-
-        // purchaseButton.onClick.RemoveAllListeners();
-        // purchaseButton.onClick.AddListener(() => PurchaseCard());
     }
 
     private void PurchaseCard()
     {
-        GameManager.Instance.PurchaseCard(cardData); // 所持金処理など
+        GameManager.Instance.PurchaseCard(cardData, true);
+        GameManager.Instance.PurchaseCard(cardData, false);
+        // GameManager.Instance.PurchaseCard(cardData); // 所持金処理など
+        CardManager.Instance.OnPlayerCardPurchased(cardData);
     }
 }
