@@ -65,4 +65,7 @@ public class CardInventory : MonoBehaviour
         cpuCards.Clear();
     }
 
+    public List<CardData> GetPlayerCards() => playerCards;
+    public List<CardData> GetCpuCards() => cpuCards;
+
 }

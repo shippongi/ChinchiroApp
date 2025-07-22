@@ -259,6 +259,7 @@ public class GameManager : MonoBehaviour
 
             // 所有カードリストに追加
             CardInventory.Instance.AddCardToPlayer(card);
+            uiManager.UpdateCardDisplays();
 
             Debug.Log($"{card.cardName} を購入しました。効果: {card.description}");
         }

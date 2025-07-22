@@ -11,6 +11,11 @@ public class UIManager : MonoBehaviour
     public TMP_Text turnText;
     public TMP_Text moneyText;
 
+    [Header("保持カードリスト")]
+    [SerializeField] private Transform playerCardParent;
+    [SerializeField] private Transform cpuCardParent;
+    [SerializeField] private GameObject cardUIPrefab;
+
     [Header("ログと役表示")]
     [SerializeField] TMP_Text resultText;
     [SerializeField] TMP_Text matchResultText; 
@@ -61,6 +66,27 @@ public class UIManager : MonoBehaviour
         decreaseBetButton.interactable = interactable;
         resetBetButton.interactable = interactable;
         allInBetButton.interactable = interactable;
+    }
+
+    public void UpdateCardDisplays()
+    {
+        // ① 既存のカードUIを全削除
+        foreach (Transform child in playerCardParent) Destroy(child.gameObject);
+        foreach (Transform child in cpuCardParent) Destroy(child.gameObject);
+
+        // ② プレイヤーのカード表示
+        foreach (CardData card in CardInventory.Instance.GetPlayerCards())
+        {
+            GameObject cardObj = Instantiate(cardUIPrefab, playerCardParent);
+            cardObj.GetComponent<CardUI>().Setup(card);
+        }
+
+        // ③ CPUのカード表示
+        foreach (CardData card in CardInventory.Instance.GetCpuCards())
+        {
+            GameObject cardObj = Instantiate(cardUIPrefab, cpuCardParent);
+            cardObj.GetComponent<CardUI>().Setup(card);
+        }
     }
 
     // === ロール中の役表示 ===
